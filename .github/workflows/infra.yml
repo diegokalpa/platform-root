@@ -8,7 +8,6 @@ on:
     paths:
       - 'infra-gcp/**'
       - '.github/workflows/infra.yml'
-      - 'REPOS/platform-root/infra-gcp/**'
   pull_request:
     branches:
       - main
@@ -16,7 +15,6 @@ on:
     paths:
       - 'infra-gcp/**'
       - '.github/workflows/infra.yml'
-      - 'REPOS/platform-root/infra-gcp/**'
   workflow_dispatch:
 
 permissions:
@@ -24,7 +22,7 @@ permissions:
   contents: read
 
 env:
-  TF_WORKING_DIR: REPOS/platform-root/infra-gcp/envs/dev
+  TF_WORKING_DIR: infra-gcp/envs/dev
 
 jobs:
   terraform:
