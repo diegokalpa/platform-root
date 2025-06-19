@@ -2,6 +2,14 @@ name: Terraform CI
 
 on:
   push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'infra-gcp/**'
+  pull_request:
+    branches:
+      - main
     paths:
       - 'infra-gcp/**'
 
@@ -44,3 +52,9 @@ jobs:
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -input=false
         env:
           TF_CLOUD_TOKEN: ${{ secrets.TFC_TOKEN }}
+
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      #   run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -auto-approve -input=false
+      #   env:
+      #     TF_CLOUD_TOKEN: ${{ secrets.TFC_TOKEN }}

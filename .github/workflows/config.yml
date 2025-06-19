@@ -2,6 +2,14 @@ name: Cluster Config CI
 
 on:
   push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'cluster-config/**'
+  pull_request:
+    branches:
+      - main
     paths:
       - 'cluster-config/**'
 
@@ -23,18 +31,31 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_PROVIDER }}
-          service_account:          ${{ secrets.GCP_SERVICE_ACCOUNT_CONFIG }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_CONFIG }}
 
-      - name: Install kustomize
+      - name: Install kustomize and kubectl
         run: |
           curl -s https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh | bash
           sudo mv kustomize /usr/local/bin/
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
       - name: Build manifests
         run: |
           kustomize build cluster-config/overlays/dev > manifest.yaml
 
-      # Placeholder: integrate Cloud Deploy or Config Sync when manifests estén listos
-      - name: Show manifest size
+      - name: Validate manifests
         run: |
-          wc -l manifest.yaml
+          if ! kubectl apply --dry-run=client -f manifest.yaml; then
+            echo "❌ Manifest validation failed"
+            exit 1
+          fi
+          echo "✅ Manifest validation passed"
+
+      - name: Deploy to cluster
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          gcloud container clusters get-credentials dievops-cluster \
+            --region us-central1 \
+            --project ${{ env.PROJECT_ID }}
+          kubectl apply -f manifest.yaml
