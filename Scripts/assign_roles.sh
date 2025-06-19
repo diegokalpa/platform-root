@@ -17,6 +17,9 @@ TF_ROLES=(
     "roles/container.admin"
     "roles/compute.networkAdmin"
     "roles/artifactregistry.admin"
+    "roles/storage.admin"
+    "roles/iam.serviceAccountTokenCreator"
+    "roles/iam.serviceAccountUser"
 )
 
 # Roles para ci-deployer
@@ -24,6 +27,8 @@ CI_ROLES=(
     "roles/cloudbuild.builds.editor"
     "roles/clouddeploy.releaser"
     "roles/artifactregistry.writer"
+    "roles/storage.objectViewer"
+    "roles/iam.serviceAccountTokenCreator"
 )
 
 # Función para asignar roles a una Service Account
