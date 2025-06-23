@@ -51,6 +51,6 @@ jobs:
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -input=false
 
       # Uncomment to allow automatic apply on main
-      # - name: Terraform Apply
-      #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      #   run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -auto-approve -input=false
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -auto-approve -input=false
