@@ -36,6 +36,7 @@ permissions:
 
 env:
   TF_WORKING_DIR: infra-gcp/envs/${{ github.event.inputs.environment || 'dev' }}
+  TF_WORKSPACE: dievops-${{ github.event.inputs.environment || 'dev' }}
 
 jobs:
   terraform:
@@ -62,11 +63,6 @@ jobs:
 
       - name: Terraform Init
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} init -input=false
-
-      - name: Terraform Workspace
-        run: |
-          terraform -chdir=${{ env.TF_WORKING_DIR }} workspace select ${{ github.event.inputs.environment || 'dev' }} || \
-          terraform -chdir=${{ env.TF_WORKING_DIR }} workspace new ${{ github.event.inputs.environment || 'dev' }}
 
       - name: Terraform Fmt
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} fmt -check
