@@ -24,4 +24,25 @@ override.tf.json
 terraform.rc
 
 # Ignore lock files (since we're using TFC)
-.terraform.lock.hcl 
+.terraform.lock.hcl
+
+# Credentials and keys
+*.pem
+*.key
+*.crt
+*.json
+*credentials*
+*key*.json
+*service-account*.json
+
+# Environment files
+.env
+.env.*
+*.env
+env.local
+
+# Local development files
+*.local
+.DS_Store
+.vscode/
+.idea/ 
