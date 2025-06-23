@@ -2,23 +2,19 @@ name: Terraform CI
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
     paths:
       - 'infra-gcp/**'
       - '.github/workflows/infra.yml'
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [ main, develop ]
     paths:
       - 'infra-gcp/**'
       - '.github/workflows/infra.yml'
   workflow_dispatch:
 
 permissions:
-  id-token: write       #  required for Workload Identity Federation
+  id-token: write
   contents: read
 
 env:
@@ -37,14 +33,13 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_PROVIDER }}
           service_account:          ${{ secrets.GCP_SERVICE_ACCOUNT_INFRA }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3    # changed
         with:
           terraform_version: 1.7.x
+          cli_config_credentials_token: ${{ secrets.TFC_TOKEN }}  # changed
 
       - name: Terraform Init
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} init -input=false
-        env:
-          TF_CLOUD_TOKEN: ${{ secrets.TFC_TOKEN }}
 
       - name: Terraform Fmt
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} fmt -check
@@ -54,11 +49,8 @@ jobs:
 
       - name: Terraform Plan
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -input=false
-        env:
-          TF_CLOUD_TOKEN: ${{ secrets.TFC_TOKEN }}
 
+      # Uncomment to allow automatic apply on main
       # - name: Terraform Apply
       #   if: github.ref == 'refs/heads/main' && github.event_name == 'push'
       #   run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -auto-approve -input=false
-      #   env:
-      #     TF_CLOUD_TOKEN: ${{ secrets.TFC_TOKEN }}
