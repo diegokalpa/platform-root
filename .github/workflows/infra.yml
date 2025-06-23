@@ -12,17 +12,40 @@ on:
       - 'infra-gcp/**'
       - '.github/workflows/infra.yml'
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform (apply/destroy)'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - apply
+          - destroy
+      environment:
+        description: 'Environment to target'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
 
 permissions:
   id-token: write
   contents: read
 
 env:
-  TF_WORKING_DIR: infra-gcp/envs/dev
+  TF_WORKING_DIR: infra-gcp/envs/${{ github.event.inputs.environment || 'dev' }}
 
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'dev' }}
+    
+    # Prevent concurrent deploys
+    concurrency: 
+      group: ${{ github.workflow }}-${{ github.event.inputs.environment || 'dev' }}
+      cancel-in-progress: false
 
     steps:
       - uses: actions/checkout@v4
@@ -31,26 +54,45 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_PROVIDER }}
-          service_account:          ${{ secrets.GCP_SERVICE_ACCOUNT_INFRA }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_INFRA }}
 
-      - uses: hashicorp/setup-terraform@v3    # changed
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.x
-          cli_config_credentials_token: ${{ secrets.TFC_TOKEN }}  # changed
+          cli_config_credentials_token: ${{ secrets.TFC_TOKEN }}
 
       - name: Terraform Init
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} init -input=false
 
+      - name: Terraform Workspace
+        run: |
+          terraform -chdir=${{ env.TF_WORKING_DIR }} workspace select ${{ github.event.inputs.environment || 'dev' }} || \
+          terraform -chdir=${{ env.TF_WORKING_DIR }} workspace new ${{ github.event.inputs.environment || 'dev' }}
+
       - name: Terraform Fmt
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} fmt -check
+        if: github.event.inputs.action != 'destroy'
 
       - name: Terraform Validate
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} validate
+        if: github.event.inputs.action != 'destroy'
 
       - name: Terraform Plan
+        if: github.event.inputs.action != 'destroy'
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -input=false
-
-      # Uncomment to allow automatic apply on main
+        
+      - name: Terraform Plan Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -destroy -input=false
+        
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: |
+          github.event.inputs.action != 'destroy' && 
+          (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -auto-approve -input=false
+
+      - name: Terraform Destroy
+        if: github.event.inputs.action == 'destroy'
+        run: |
+          echo "⚠️ DESTROYING INFRASTRUCTURE IN ${{ github.event.inputs.environment || 'dev' }} ⚠️"
+          terraform -chdir=${{ env.TF_WORKING_DIR }} destroy -auto-approve -input=false
