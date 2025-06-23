@@ -20,6 +20,9 @@ TF_ROLES=(
     "roles/storage.admin"
     "roles/iam.serviceAccountTokenCreator"
     "roles/iam.serviceAccountUser"
+    "roles/iam.serviceAccountAdmin"
+    "roles/iam.workloadIdentityUser"
+    "roles/resourcemanager.projectIamAdmin"
 )
 
 # Roles para ci-deployer
