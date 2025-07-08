@@ -15,3 +15,9 @@ variable "env" {
   type        = string
   default     = "dev"
 }
+
+variable "GOOGLE_CREDENTIALS" {
+  description = "Google Cloud credentials"
+  type        = string
+  sensitive   = true
+}

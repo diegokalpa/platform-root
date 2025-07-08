@@ -25,4 +25,5 @@ gcloud services enable \
   iam.googleapis.com \
   artifactregistry.googleapis.com \
   cloudbuild.googleapis.com \
-  clouddeploy.googleapis.com
+  clouddeploy.googleapis.com \
+  run.googleapis.com
