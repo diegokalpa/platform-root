@@ -5,6 +5,12 @@ terraform {
       version = "~> 5.0"
     }
   }
+  cloud {
+    organization = "dievops"
+    workspaces {
+      name = "dievops-dev"
+    }
+  }
 }
 
 provider "google" {
@@ -12,10 +18,18 @@ provider "google" {
   region  = var.region
 }
 
-module "network" {
-  source     = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/network"
-  env        = var.env
-  region     = var.region
-  project_id = var.project_id
-  cidr_block = "10.70.0.0/17"
+# n8n en Cloud Run
+module "n8n" {
+  source      = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run"
+  project_id  = var.project_id
+  region      = var.region
+  env         = var.env
+  service_name = "n8n"
+  image       = "n8nio/n8n:latest"
+}
+
+# Output útil para obtener la URL de n8n
+output "n8n_url" {
+  description = "URL donde n8n está desplegado"
+  value       = module.n8n.service_url
 }
