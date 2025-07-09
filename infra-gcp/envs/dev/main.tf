@@ -26,12 +26,12 @@ module "n8n" {
   env          = var.env
   service_name = "n8n"
   image        = "n8nio/n8n:latest"
-  
+
   # Configuración específica para n8n
   container_port = 5678
   cpu_limit      = "1000m"
   memory_limit   = "512Mi"
-  
+
   # Variables de entorno específicas de n8n
   environment_variables = {
     ENVIRONMENT      = var.env
@@ -41,7 +41,7 @@ module "n8n" {
     WEBHOOK_URL      = "https://${var.env}-n8n-${random_id.suffix.hex}.run.app"
     GENERIC_TIMEZONE = "UTC"
   }
-  
+
   # Configuración de escalado
   min_instances = 0
   max_instances = 10
