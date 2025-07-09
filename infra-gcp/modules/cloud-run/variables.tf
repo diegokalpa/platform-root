@@ -69,12 +69,12 @@ variable "max_instances" {
 }
 
 variable "execution_environment" {
-  description = "Execution environment (GEN1 or GEN2)"
+  description = "Execution environment (EXECUTION_ENVIRONMENT_GEN1 or EXECUTION_ENVIRONMENT_GEN2)"
   type        = string
-  default     = "GEN2"
+  default     = "EXECUTION_ENVIRONMENT_GEN2"
   validation {
-    condition     = contains(["GEN1", "GEN2"], var.execution_environment)
-    error_message = "Execution environment must be either GEN1 or GEN2."
+    condition     = contains(["EXECUTION_ENVIRONMENT_GEN1", "EXECUTION_ENVIRONMENT_GEN2", ""], var.execution_environment)
+    error_message = "Execution environment must be either EXECUTION_ENVIRONMENT_GEN1, EXECUTION_ENVIRONMENT_GEN2, or empty string."
   }
 }
 
