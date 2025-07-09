@@ -26,6 +26,30 @@ module "n8n" {
   env          = var.env
   service_name = "n8n"
   image        = "n8nio/n8n:latest"
+  
+  # Configuración específica para n8n
+  container_port = 5678
+  cpu_limit      = "1000m"
+  memory_limit   = "512Mi"
+  
+  # Variables de entorno específicas de n8n
+  environment_variables = {
+    ENVIRONMENT      = var.env
+    N8N_HOST         = "0.0.0.0"
+    N8N_PORT         = "5678"
+    N8N_PROTOCOL     = "https"
+    WEBHOOK_URL      = "https://${var.env}-n8n-${random_id.suffix.hex}.run.app"
+    GENERIC_TIMEZONE = "UTC"
+  }
+  
+  # Configuración de escalado
+  min_instances = 0
+  max_instances = 10
+}
+
+# Random ID para el webhook URL
+resource "random_id" "suffix" {
+  byte_length = 4
 }
 
 # Output útil para obtener la URL de n8n

@@ -1,0 +1,151 @@
+# Ejemplo de cómo agregar múltiples aplicaciones usando el módulo genérico de Cloud Run
+# Copia este archivo a apps.tf y personaliza según tus necesidades
+
+# 1. Aplicación Node.js/Express
+module "api_service" {
+  source       = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run"
+  project_id   = var.project_id
+  region       = var.region
+  env          = var.env
+  service_name = "api"
+  image        = "gcr.io/${var.project_id}/api-service:latest"
+  
+  container_port = 3000
+  cpu_limit      = "500m"
+  memory_limit   = "256Mi"
+  
+  environment_variables = {
+    NODE_ENV = "production"
+    PORT     = "3000"
+    DB_URL   = "postgresql://user:pass@host:5432/db"
+  }
+  
+  min_instances = 1
+  max_instances = 20
+}
+
+# 2. Aplicación Python/FastAPI
+module "ml_service" {
+  source       = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run"
+  project_id   = var.project_id
+  region       = var.region
+  env          = var.env
+  service_name = "ml-api"
+  image        = "gcr.io/${var.project_id}/ml-service:latest"
+  
+  container_port = 8000
+  cpu_limit      = "2000m"  # Más CPU para ML
+  memory_limit   = "1Gi"    # Más memoria para ML
+  
+  environment_variables = {
+    MODEL_PATH = "/app/models"
+    BATCH_SIZE = "32"
+  }
+  
+  min_instances = 0
+  max_instances = 5
+}
+
+# 3. Aplicación React (servidor estático)
+module "frontend" {
+  source       = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run"
+  project_id   = var.project_id
+  region       = var.region
+  env          = var.env
+  service_name = "frontend"
+  image        = "gcr.io/${var.project_id}/frontend:latest"
+  
+  container_port = 80
+  cpu_limit      = "250m"
+  memory_limit   = "128Mi"
+  
+  environment_variables = {
+    REACT_APP_API_URL = module.api_service.service_url
+  }
+  
+  min_instances = 1
+  max_instances = 10
+}
+
+# 4. Aplicación con secretos (ejemplo: base de datos)
+module "db_service" {
+  source       = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run"
+  project_id   = var.project_id
+  region       = var.region
+  env          = var.env
+  service_name = "database"
+  image        = "gcr.io/${var.project_id}/db-service:latest"
+  
+  container_port = 5432
+  cpu_limit      = "1000m"
+  memory_limit   = "512Mi"
+  
+  # Variables de entorno normales
+  environment_variables = {
+    DB_NAME = "myapp"
+  }
+  
+  # Variables de entorno secretas
+  secret_environment_variables = {
+    DB_PASSWORD = {
+      secret_name    = "db-password"
+      secret_version = "latest"
+    }
+    DB_USER = {
+      secret_name    = "db-user"
+      secret_version = "latest"
+    }
+  }
+  
+  # Servicio privado (no público)
+  public_access = false
+  allowed_service_accounts = [
+    "service-account@${var.project_id}.iam.gserviceaccount.com"
+  ]
+  
+  min_instances = 1
+  max_instances = 3
+}
+
+# 5. Aplicación Go/Gin
+module "go_api" {
+  source       = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run"
+  project_id   = var.project_id
+  region       = var.region
+  env          = var.env
+  service_name = "go-api"
+  image        = "gcr.io/${var.project_id}/go-api:latest"
+  
+  container_port = 8080
+  cpu_limit      = "500m"
+  memory_limit   = "256Mi"
+  
+  environment_variables = {
+    GIN_MODE = "release"
+    PORT     = "8080"
+  }
+  
+  min_instances = 0
+  max_instances = 15
+}
+
+# Outputs para todas las aplicaciones
+output "api_url" {
+  description = "URL de la API"
+  value       = module.api_service.service_url
+}
+
+output "ml_api_url" {
+  description = "URL del servicio de ML"
+  value       = module.ml_service.service_url
+}
+
+output "frontend_url" {
+  description = "URL del frontend"
+  value       = module.frontend.service_url
+}
+
+output "go_api_url" {
+  description = "URL de la API Go"
+  value       = module.go_api.service_url
+} 

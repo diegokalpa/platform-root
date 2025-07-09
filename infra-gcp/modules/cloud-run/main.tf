@@ -9,57 +9,72 @@ resource "google_cloud_run_v2_service" "service" {
 
       resources {
         limits = {
-          cpu    = "1000m"
-          memory = "512Mi"
+          cpu    = var.cpu_limit
+          memory = var.memory_limit
         }
       }
 
       ports {
-        container_port = 5678
+        container_port = var.container_port
       }
 
-      env {
-        name  = "ENVIRONMENT"
-        value = var.env
+      # Variables de entorno dinámicas
+      dynamic "env" {
+        for_each = var.environment_variables
+        content {
+          name  = env.key
+          value = env.value
+        }
       }
 
-      env {
-        name  = "N8N_HOST"
-        value = "0.0.0.0"
-      }
-
-      env {
-        name  = "N8N_PORT"
-        value = "5678"
-      }
-
-      env {
-        name  = "N8N_PROTOCOL"
-        value = "https"
-      }
-
-      env {
-        name  = "WEBHOOK_URL"
-        value = "https://${var.env}-${var.service_name}-${random_id.suffix.hex}.run.app"
-      }
-
-      env {
-        name  = "GENERIC_TIMEZONE"
-        value = "UTC"
+      # Variables de entorno secretas (opcional)
+      dynamic "env" {
+        for_each = var.secret_environment_variables
+        content {
+          name = env.key
+          value_source {
+            secret_key_ref {
+              secret  = env.value.secret_name
+              version = env.value.secret_version
+            }
+          }
+        }
       }
     }
+
+    # Configuración de escalado
+    scaling {
+      min_instance_count = var.min_instances
+      max_instance_count = var.max_instances
+    }
+
+    # Configuración de concurrencia
+    execution_environment = var.execution_environment
+  }
+
+  # Configuración de tráfico
+  traffic {
+    type    = "TRAFFIC_TARGET_ALLOCATION_TYPE_LATEST"
+    percent = 100
   }
 }
 
-resource "random_id" "suffix" {
-  byte_length = 4
-}
-
-# IAM - Hacer el servicio público
+# IAM - Configuración de acceso
 resource "google_cloud_run_service_iam_member" "public" {
+  count    = var.public_access ? 1 : 0
   project  = var.project_id
   location = var.region
   service  = google_cloud_run_v2_service.service.name
   role     = "roles/run.invoker"
   member   = "allUsers"
+}
+
+# IAM - Acceso específico por servicio account (opcional)
+resource "google_cloud_run_service_iam_member" "service_account" {
+  for_each = toset(var.allowed_service_accounts)
+  project  = var.project_id
+  location = var.region
+  service  = google_cloud_run_v2_service.service.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${each.value}"
 } 
