@@ -88,4 +88,10 @@ variable "allowed_service_accounts" {
   description = "List of service accounts allowed to invoke the service"
   type        = list(string)
   default     = []
+}
+
+variable "service_account" {
+  description = "Service account to run the Cloud Run service"
+  type        = string
+  default     = null
 } 

@@ -20,7 +20,9 @@ provider "google" {
 
 # n8n en Cloud Run
 module "n8n" {
-  source       = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run"
+  # source = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run" # ← Usa esto cuando quieras el módulo remoto
+  # source = "../../modules/cloud-run" # ← Usa esto para probar cambios locales con path relativo
+  source = "/Users/diegocoral/DIEVOPS/REPOS/platform-root/infra-gcp/modules/cloud-run" # ← Usa esto para probar cambios locales con path absoluto
   project_id   = var.project_id
   region       = var.region
   env          = var.env
@@ -29,6 +31,7 @@ module "n8n" {
   
   # Usar el service account existente
   allowed_service_accounts = ["ci-deployer@${var.project_id}.iam.gserviceaccount.com"]
+  service_account          = "ci-deployer@${var.project_id}.iam.gserviceaccount.com"
 
   # Configuración específica para n8n
   container_port = 5678
@@ -37,13 +40,18 @@ module "n8n" {
 
   # Variables de entorno específicas de n8n
   environment_variables = {
-    ENVIRONMENT      = var.env
-    N8N_HOST         = "0.0.0.0"
-    N8N_PORT         = "5678"
-    N8N_PROTOCOL     = "https"
-    WEBHOOK_URL      = "https://${var.env}-n8n-${random_id.suffix.hex}.run.app"
-    GENERIC_TIMEZONE = "UTC"
-    DB_POSTGRESDB_PORT  = "6543"
+    ENVIRONMENT                = var.env
+    N8N_HOST                  = "0.0.0.0"
+    N8N_PORT                  = "5678"
+    N8N_PROTOCOL              = "https"
+    WEBHOOK_URL               = "https://${var.env}-n8n-${random_id.suffix.hex}.run.app"
+    GENERIC_TIMEZONE          = "America/Lima"
+    TZ                        = "America/Lima"
+    DB_POSTGRESDB_PORT        = "6543"
+    N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = "TRUE"
+    N8N_RUNNERS_ENABLED       = "TRUE"
+    DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED = "FALSE"
+    DB_POSTGRESDB_SCHEMA      = "public"
   }
 
   # Variables de entorno secretas para Supabase

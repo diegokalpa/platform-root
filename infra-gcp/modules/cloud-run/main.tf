@@ -50,6 +50,9 @@ resource "google_cloud_run_v2_service" "service" {
 
     # Configuración de concurrencia
     execution_environment = var.execution_environment
+
+    # Service account
+    service_account = var.service_account
   }
 
   # Configuración de tráfico
