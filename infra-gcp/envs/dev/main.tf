@@ -43,6 +43,7 @@ module "n8n" {
     N8N_PROTOCOL     = "https"
     WEBHOOK_URL      = "https://${var.env}-n8n-${random_id.suffix.hex}.run.app"
     GENERIC_TIMEZONE = "UTC"
+    DB_POSTGRESDB_PORT  = "6543"
   }
 
   # Variables de entorno secretas para Supabase
