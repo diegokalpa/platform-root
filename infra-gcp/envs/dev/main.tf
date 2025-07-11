@@ -26,6 +26,9 @@ module "n8n" {
   env          = var.env
   service_name = "n8n"
   image        = "n8nio/n8n:latest"
+  
+  # Usar el service account existente
+  allowed_service_accounts = ["ci-deployer@${var.project_id}.iam.gserviceaccount.com"]
 
   # Configuración específica para n8n
   container_port = 5678
@@ -42,9 +45,12 @@ module "n8n" {
     GENERIC_TIMEZONE = "UTC"
   }
 
+  # Variables de entorno secretas para Supabase
+  secret_environment_variables = var.n8n_secret_environment_variables
+
   # Configuración de escalado
   min_instances = 0
-  max_instances = 10
+  max_instances = 2
 }
 
 

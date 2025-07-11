@@ -40,6 +40,7 @@ CI_ROLES=(
     "roles/artifactregistry.writer"
     "roles/storage.objectViewer"
     "roles/iam.serviceAccountTokenCreator"
+    "roles/secretmanager.secretAccessor"
 )
 
 # Función para asignar roles a una Service Account
