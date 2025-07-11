@@ -1,16 +1,6 @@
 name: Terraform CI
 
 on:
-  push:
-    branches: [ main, develop ]
-    paths:
-      - 'infra-gcp/**'
-      - '.github/workflows/infra.yml'
-  pull_request:
-    branches: [ main, develop ]
-    paths:
-      - 'infra-gcp/**'
-      - '.github/workflows/infra.yml'
   workflow_dispatch:
     inputs:
       action:
@@ -81,9 +71,7 @@ jobs:
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -destroy -input=false
         
       - name: Terraform Apply
-        if: |
-          github.event.inputs.action != 'destroy' && 
-          (github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch')
+        if: github.event.inputs.action != 'destroy'
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} apply -auto-approve -input=false
 
       - name: Terraform Destroy
