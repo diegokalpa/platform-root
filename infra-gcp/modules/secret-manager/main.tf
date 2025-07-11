@@ -38,14 +38,16 @@ resource "google_secret_manager_secret_iam_member" "cloud_run_access" {
 
 # IAM - Acceso para service accounts específicos
 resource "google_secret_manager_secret_iam_member" "service_account_access" {
-  for_each = { for key, value in flatten([
-    for secret_key, secret_config in var.secrets : [
-      for sa in secret_config.allowed_service_accounts : {
-        secret_key = secret_key
-        service_account = sa
-      }
-    ]
-  ]) : "${key.secret_key}-${key.service_account}" => key }
+  for_each = {
+    for pair in flatten([
+      for secret_key, secret_config in var.secrets : [
+        for sa in secret_config.allowed_service_accounts : {
+          secret_key = secret_key
+          service_account = sa
+        }
+      ]
+    ]) : "${pair.secret_key}-${pair.service_account}" => pair
+  }
 
   project   = var.project_id
   secret_id = google_secret_manager_secret.secret[each.value.secret_key].secret_id
