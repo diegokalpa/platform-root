@@ -47,43 +47,7 @@ module "n8n" {
   max_instances = 10
 }
 
-# Secret Manager - Gestión de secretos
-module "secrets" {
-  source = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/secret-manager"
-  
-  project_id = var.project_id
-  env        = var.env
-  
-  # Service account que usan los servicios de Cloud Run
-  cloud_run_service_account = "dievops-dev@${var.project_id}.iam.gserviceaccount.com"
-  
-  # Definir los secretos que queremos crear
-  secrets = {
-    # Ejemplo: credenciales de base de datos
-    "db-password" = {
-      secret_data = "placeholder" # Se reemplazará manualmente en GCP
-      allowed_service_accounts = [
-        "dievops-dev@${var.project_id}.iam.gserviceaccount.com"
-      ]
-    }
-    
-    # Ejemplo: API key de un servicio externo
-    "api-key" = {
-      secret_data = "placeholder" # Se reemplazará manualmente en GCP
-      allowed_service_accounts = [
-        "dievops-dev@${var.project_id}.iam.gserviceaccount.com"
-      ]
-    }
-    
-    # Ejemplo: configuración de n8n
-    "n8n-encryption-key" = {
-      secret_data = "placeholder" # Se reemplazará manualmente en GCP
-      allowed_service_accounts = [
-        "dievops-dev@${var.project_id}.iam.gserviceaccount.com"
-      ]
-    }
-  }
-}
+
 
 # Random ID para el webhook URL
 resource "random_id" "suffix" {
@@ -96,13 +60,4 @@ output "n8n_url" {
   value       = module.n8n.service_url
 }
 
-# Outputs de Secret Manager
-output "secret_ids" {
-  description = "IDs de los secretos creados"
-  value       = module.secrets.secret_ids
-}
 
-output "secret_versions" {
-  description = "Versiones de los secretos creados"
-  value       = module.secrets.secret_versions
-}
