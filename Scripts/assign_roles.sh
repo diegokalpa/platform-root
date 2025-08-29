@@ -4,6 +4,12 @@ set -euo pipefail
 ###############################################################################
 # VALORES ESPECÍFICOS DE TU ENTORNO - Configura via variables de entorno
 ###############################################################################
+# Load configuration from config.env if it exists
+if [ -f "config.env" ]; then
+    echo "📁 Loading configuration from config.env..."
+    source config.env
+fi
+
 PROJECT_ID=${PROJECT_ID:-""}          # ID del proyecto GCP
 SA_TF=${SA_TF:-"terraform-gcp-admin"} # SA para Terraform
 SA_CI=${SA_CI:-"ci-deployer"}        # SA para CI/CD
@@ -11,7 +17,7 @@ SA_CI=${SA_CI:-"ci-deployer"}        # SA para CI/CD
 # Validar que PROJECT_ID esté configurado
 if [ -z "$PROJECT_ID" ]; then
     echo "❌ Error: PROJECT_ID no está configurado"
-    echo "Configura la variable de entorno PROJECT_ID antes de ejecutar este script"
+    echo "Configura la variable de entorno PROJECT_ID o crea config.env basado en config.env.example"
     exit 1
 fi
 ###############################################################################

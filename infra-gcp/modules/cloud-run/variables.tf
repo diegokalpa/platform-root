@@ -94,4 +94,22 @@ variable "service_account" {
   description = "Service account to run the Cloud Run service"
   type        = string
   default     = null
+}
+
+variable "vpc_connector" {
+  description = "The name of the VPC Access connector to use."
+  type        = string
+  default     = null
+}
+
+variable "vpc_egress" {
+  description = "The VPC egress setting (ALL_TRAFFIC or PRIVATE_RANGES_ONLY)."
+  type        = string
+  default     = "PRIVATE_RANGES_ONLY"
+}
+
+variable "cpu_idle" {
+  description = "Whether to disable CPU boost on idle instances"
+  type        = bool
+  default     = false
 } 

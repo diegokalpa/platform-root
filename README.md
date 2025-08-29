@@ -1,67 +1,45 @@
-# DIEVOPS Platform Infrastructure
+# DIEVOPS Platform
 
-## Project Overview
-Infrastructure as Code (IaC) repository for managing GCP infrastructure and Kubernetes configurations using Terraform Cloud and GitOps practices.
+Infraestructura como código para GCP usando Terraform Cloud y Cloud Run.
 
-## Architecture
-For detailed architecture diagrams and workflow explanations, see [Architecture Documentation](docs/architecture.md).
+## 🚀 Inicio Rápido
 
-## Current Structure
-```
-platform-root/
-├── docs/
-│   └── architecture.md   # Architecture diagrams and documentation
-├── infra-gcp/
-│   ├── modules/          # Terraform modules (pending)
-│   └── envs/
-│       └── dev/         # Development environment
-│           ├── backend.tf  # Terraform Cloud configuration
-│           └── main.tf     # Base GCP provider setup
-├── cluster-config/      # Kubernetes configurations
-│   ├── base/           # Base configurations (pending)
-│   └── overlays/       # Environment-specific overlays (pending)
-└── .gitignore          # Git ignore patterns for Terraform
-```
-
-## Environment Configuration
-
-### Development Environment
-- **Project ID**: dievops-dev
-- **Region**: us-central1
-- **Terraform Cloud Workspace**: dievops-dev
-
-## Prerequisites
-- Google Cloud SDK
-- Terraform CLI
-- Terraform Cloud Account
-- GCP Project with required APIs enabled
-
-## Current Setup Status
-- [x] Basic repository structure
-- [x] Terraform Cloud backend configuration
-- [x] GCP provider configuration
-- [x] Development environment basic setup
-- [ ] Terraform modules implementation
-- [ ] Kubernetes configurations
-- [ ] CI/CD pipelines
-
-## Getting Started
-1. Ensure you have the required prerequisites
-2. Set up Terraform Cloud token:
+1. **Configurar variables**:
    ```bash
-   export TF_TOKEN_app_terraform_io="your-token"
+   cp Scripts/config.env.example Scripts/config.env
+   nano Scripts/config.env  # Editar con tus valores
    ```
-3. Initialize Terraform:
+
+2. **Ejecutar scripts**:
+   ```bash
+   ./Scripts/workload_identity.sh
+   ./Scripts/assign_roles.sh
+   ```
+
+3. **Desplegar infraestructura**:
    ```bash
    cd infra-gcp/envs/dev
    terraform init
+   terraform apply
    ```
 
-## Next Steps
-1. Implement core Terraform modules:
-   - GKE cluster
-   - Networking
-   - Gateway API
-2. Set up Kubernetes base configurations
-3. Configure CI/CD pipelines
-4. Implement production environment 
+## 📁 Estructura
+
+```
+platform-root/
+├── infra-gcp/envs/dev/     # Entorno de desarrollo
+├── Scripts/                # Scripts de configuración
+└── docs/                   # Documentación
+```
+
+## 🔧 Configuración
+
+- **Proyecto GCP**: `dievops-dev`
+- **Región**: `us-central1`
+- **Aplicación**: n8n en Cloud Run
+
+## 📋 Prerequisitos
+
+- Google Cloud SDK
+- Terraform CLI
+- Cuenta en Terraform Cloud 

@@ -12,13 +12,14 @@ resource "google_cloud_run_v2_service" "service" {
           cpu    = var.cpu_limit
           memory = var.memory_limit
         }
+        cpu_idle = var.cpu_idle
       }
 
       ports {
         container_port = var.container_port
       }
 
-      # Variables de entorno dinámicas
+      # Variables de entorno combinadas
       dynamic "env" {
         for_each = var.environment_variables
         content {
@@ -27,7 +28,6 @@ resource "google_cloud_run_v2_service" "service" {
         }
       }
 
-      # Variables de entorno secretas (opcional)
       dynamic "env" {
         for_each = var.secret_environment_variables
         content {
@@ -53,6 +53,15 @@ resource "google_cloud_run_v2_service" "service" {
 
     # Service account
     service_account = var.service_account
+
+    # VPC Access - Solo si se proporciona un connector
+    dynamic "vpc_access" {
+      for_each = var.vpc_connector != null ? [1] : []
+      content {
+        connector = var.vpc_connector
+        egress    = var.vpc_egress
+      }
+    }
   }
 
   # Configuración de tráfico

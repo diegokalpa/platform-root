@@ -18,60 +18,60 @@ provider "google" {
   region  = var.region
 }
 
-# n8n en Cloud Run
+# n8n on Cloud Run
 module "n8n" {
-  # source = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run" # ← Usa esto cuando quieras el módulo remoto
-  # source = "../../modules/cloud-run" # ← Usa esto para probar cambios locales con path relativo
-  source = "/Users/diegocoral/DIEVOPS/REPOS/platform-root/infra-gcp/modules/cloud-run" # ← Usa esto para probar cambios locales con path absoluto
+  # source = "git::https://github.com/diegokalpa/platform-root.git//infra-gcp/modules/cloud-run" # Remote module
+  # source = "../../modules/cloud-run" # Local module with relative path
+  source = "/Users/diegocoral/DIEVOPS/REPOS/platform-root/infra-gcp/modules/cloud-run" # Local module with absolute path
   project_id   = var.project_id
   region       = var.region
   env          = var.env
   service_name = "n8n"
-  image        = "n8nio/n8n:latest"
+  image        = "n8nio/n8n:1.109.1"
   
-  # Usar el service account existente
+  # Use existing service account
   allowed_service_accounts = ["ci-deployer@${var.project_id}.iam.gserviceaccount.com"]
   service_account          = "ci-deployer@${var.project_id}.iam.gserviceaccount.com"
 
-  # Configuración específica para n8n
-  container_port = 5678
+  # n8n specific configuration
+  container_port = 8080
   cpu_limit      = "1000m"
   memory_limit   = "512Mi"
+  cpu_idle       = true
 
-  # Variables de entorno específicas de n8n
+  # Environment variables specific to n8n - IDENTICAL TO RENDER
   environment_variables = {
-    ENVIRONMENT                = var.env
-    N8N_HOST                  = "0.0.0.0"
-    N8N_PORT                  = "5678"
-    N8N_PROTOCOL              = "https"
-    WEBHOOK_URL               = "https://${var.env}-n8n-${random_id.suffix.hex}.run.app"
-    GENERIC_TIMEZONE          = "America/Lima"
-    TZ                        = "America/Lima"
-    DB_POSTGRESDB_PORT        = "6543"
+    DB_POSTGRESDB_DATABASE = "postgres"
+    DB_POSTGRESDB_PORT = "6543"
+    DB_POSTGRESDB_SCHEMA = "public"
+    DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED = "FALSE"
+    DB_TYPE = "postgresdb"
+    GENERIC_TIMEZONE = "America/Lima"
     N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS = "TRUE"
-    N8N_RUNNERS_ENABLED       = "TRUE"
-    DB_POSTGRESDB_SSL          = "true"
-    DB_POSTGRESDB_SCHEMA      = "public"
+    N8N_PROTOCOL = "https"
+    N8N_RUNNERS_ENABLED = "TRUE"
+    TZ = "America/Lima"
+    N8N_PORT = "8080"
+    WEBHOOK_URL = "https://dev-n8n-1097007406093.us-central1.run.app"
+    N8N_HOST = "dev-n8n-1097007406093.us-central1.run.app"
   }
 
-  # Variables de entorno secretas para Supabase
+  # Secret environment variables for Supabase
   secret_environment_variables = var.n8n_secret_environment_variables
 
-  # Configuración de escalado
+  # Scaling configuration
   min_instances = 0
   max_instances = 2
 }
 
-
-
-# Random ID para el webhook URL
+# Random ID for webhook URL
 resource "random_id" "suffix" {
   byte_length = 4
 }
 
-# Output útil para obtener la URL de n8n
+# Useful output to get n8n URL
 output "n8n_url" {
-  description = "URL donde n8n está desplegado"
+  description = "URL where n8n is deployed"
   value       = module.n8n.service_url
 }
 

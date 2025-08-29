@@ -1,8 +1,13 @@
 # Script para controlar el Budget de GCP (ejecutar en terminal)
 
+# Load configuration from config.env if it exists
+if [ -f "config.env" ]; then
+    source config.env
+fi
+
 # Variables
-PROJECT_ID="dievops-dev"
-BILLING_ID="01905E-3C9524-D69BCF"
+PROJECT_ID=${PROJECT_ID:-"dievops-dev"}
+BILLING_ID=${BILLING_ID:-"01905E-3C9524-D69BCF"}
 
 # Crea proyecto y vincúlalo a la cuenta de facturación
 gcloud projects create $PROJECT_ID --name="Dev Platform"

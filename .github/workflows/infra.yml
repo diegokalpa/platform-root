@@ -65,7 +65,7 @@ jobs:
       - name: Terraform Plan
         if: github.event.inputs.action != 'destroy'
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -input=false
-        
+
       - name: Terraform Plan Destroy
         if: github.event.inputs.action == 'destroy'
         run: terraform -chdir=${{ env.TF_WORKING_DIR }} plan -destroy -input=false

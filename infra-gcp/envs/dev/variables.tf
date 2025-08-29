@@ -1,7 +1,6 @@
 variable "project_id" {
-  description = "The GCP project ID"
+  description = "The GCP project ID where n8n will be deployed"
   type        = string
-  default     = "dievops-dev"
 }
 
 variable "region" {
@@ -22,7 +21,7 @@ variable "GOOGLE_CREDENTIALS" {
   sensitive   = true
 }
 
-# Variables de entorno secretas para n8n con Supabase
+# Secret environment variables for n8n with Supabase
 variable "n8n_secret_environment_variables" {
   description = "Secret environment variables for n8n with Supabase"
   type = map(object({
@@ -30,40 +29,28 @@ variable "n8n_secret_environment_variables" {
     secret_version = string
   }))
   default = {
-    DB_TYPE = {
-      secret_name    = "dev-db-type"
-      secret_version = "latest"
-    }
-    DB_POSTGRESDB_HOST = {
-      secret_name    = "dev-supabase-url"
-      secret_version = "latest"
-    }
-    DB_POSTGRESDB_DATABASE = {
-      secret_name    = "dev-supabase-database"
-      secret_version = "latest"
-    }
-    DB_POSTGRESDB_USER = {
-      secret_name    = "dev-supabase-user"
-      secret_version = "latest"
-    }
     DB_POSTGRESDB_PASSWORD = {
-      secret_name    = "dev-supabase-password"
+      secret_name    = "dev-n8n-db-password"
       secret_version = "latest"
-    }
+    },
+    DB_POSTGRESDB_USER = {
+      secret_name    = "dev-n8n-db-user"
+      secret_version = "latest"
+    },
+    DB_POSTGRESDB_HOST = {
+      secret_name    = "dev-n8n-db-host"
+      secret_version = "latest"
+    },
     N8N_ENCRYPTION_KEY = {
       secret_name    = "dev-n8n-encryption-key"
-      secret_version = "latest"
-    }
-    N8N_JWT_SECRET = {
-      secret_name    = "dev-n8n-jwt-secret"
       secret_version = "latest"
     }
   }
 }
 
-# Service account para Cloud Run
+# Service account for Cloud Run
 variable "cloud_run_service_account" {
   description = "Service account for Cloud Run services"
   type        = string
-  default     = "ci-deployer@dievops-dev.iam.gserviceaccount.com"
+  default     = "ci-deployer@your-project-id.iam.gserviceaccount.com"
 }

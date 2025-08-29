@@ -41,6 +41,9 @@ terraform.rc
 *.env
 env.local
 
+# Configuration files with sensitive data
+config.env
+
 # Local development files
 *.local
 .DS_Store

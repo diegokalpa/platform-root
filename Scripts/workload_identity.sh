@@ -4,11 +4,21 @@ set -euo pipefail
 ###############################################################################
 # VALORES ESPECÍFICOS DE TU ENTORNO
 ###############################################################################
-PROJECT_ID="dievops-dev"          # ID del proyecto GCP
-GITHUB_USER="diegokalpa"          # Usuario/organización en GitHub
-REPO_NAME="platform-root"         # Repositorio único
-POOL_ID="ci-pool"                 # Workload Identity Pool
-PROVIDER_ID="github"              # Provider OIDC
+# Load configuration from config.env if it exists
+if [ -f "config.env" ]; then
+    echo "📁 Loading configuration from config.env..."
+    source config.env
+else
+    echo "⚠️  config.env not found. Using default values or environment variables."
+    echo "   Copy config.env.example to config.env and configure your values."
+fi
+
+# Fallback to environment variables or defaults
+PROJECT_ID=${PROJECT_ID:-"dievops-dev"}
+GITHUB_USER=${GITHUB_USER:-"diegokalpa"}
+REPO_NAME=${REPO_NAME:-"platform-root"}
+POOL_ID=${POOL_ID:-"ci-pool"}
+PROVIDER_ID=${PROVIDER_ID:-"github"}
 ###############################################################################
 
 # ─────────────────────────────────────────────────────────────────────────────
